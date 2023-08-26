@@ -61,4 +61,8 @@
 	- Bus adapter
 	- Bus drivers
 	- Bus devices
+  Platform Bus -
+        - Virtual bus called platform bus
+	- Drivers are register on this bus, if the name of the device match with driver, kernel call probe fun
+
 
