@@ -61,8 +61,14 @@
 	- Bus adapter
 	- Bus drivers
 	- Bus devices
-  Platform Bus -
-        - Virtual bus called platform bus
-	- Drivers are register on this bus, if the name of the device match with driver, kernel call probe fun
 
+# Sysfs entry creation:
+	- First step ... Get the handle of sysfs
+	- Create sysfs directory under the /sysfs/kernel/ using -kobject_create_and_add()
+	- struct kobject * to add subdirectories, add files, etc.
+	- Free it once done -  kobject_put()
 
+# Important point to remember:
+	- When building a module out of kernel tree and your module uses EXPORT_SYMBOL 
+	  The build will not be success, to build such module copy the Module.symvers
+  
