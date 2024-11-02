@@ -1,74 +1,87 @@
 # Kernel Work Intro
-	This repo is intented to highlight the kernel work done.
 
-## Raw Flash device driver and filesystem porting
-	In this project i have done raw onenand flash driver porting from higher kernel version to lower kernel version.
-	1. This involves the required changes in MTD added new onenand layer and crossponding required changes in MTD subsystem. 
-	2. Implement the onenand driver initialization routine, also add entry in MTD subsystem makefile and Kconfig enty.
-	3. Porting the flash supported filesystem jffs2 from higher version of kernel and mitigate the core kernel fs subsystem changes.
-	4. Utilize the opensource MTD test package, which has many utilies in it to verify the raw flash read/write/erease routine.  
+This repository highlights work related to the Linux kernel, specifically focusing on device driver structures, kernel modules, and related filesystem porting.
 
-# Intro of char driver
-## HW access (MMIO, gpiolib)
-## Intro to driver model
-## Frameworks
-## Buses and device tree
+## Project Description
 
-# Device driver are abstraction to a piece of HW.
-	Though we have device driver running in userspace (via some kernel interface UIO or I2CDEV, SPIDEV),
-	Providing an infrastructure to write and run device driver is part of an OS kernel responsibility.
-	In Linux, a file is most coomon abstruction.
-	File (user space) --> Device Driver (Kernel) --> HW Device (HW)
-	Device nodes are one of the interfaces that could be used, where files are exported to users in /dev in that from of char or block device files.
+This project explores the Linux device driver structures with example code. It includes porting a raw OneNAND flash device driver and filesystem, building kernel modules, and interacting with hardware interfaces. The examples demonstrate how to implement and manage device drivers within the Linux kernel environment.
 
-## These device files have accociated thee basic information:
-	- Type (block or char)
-	- Major number
-	- Minor number
 
-# Implementing A Char Driver:
-	There are 3 steps to implement the char driver
-	Step 1: Allocate the driver number(major/minor). This can be done with register_chardev_region or alloc_chardev_region
-	Step 2: Implement file operation (open, read, write, ioctl etc)
-	Step 3: Register the char driver in the kernel with cdev_init and cdev_add
+## Raw Flash Device Driver and Filesystem Porting
 
-# HW Interface:
-	- Depending on the HW arch there are few mechanisum a CPU can use to communicate with HW
-   		- Port I/O a dedicated bus is used to communicate with HW
-    		- Memory mapped I/O the memory address space is shared with HW.
-	- MMIO is currently the most common approach adopted by propular arch like ARM.
-	- CPU-->MMU-->Memory
+In this project, I have ported the raw OneNAND flash driver from a higher kernel version to a lower kernel version.
 
-# How to talk to a MMIO device:
-	Step 1: request access to MMIO register using the few kernel API like request_mem_region
-	Step 2: Map the register physical address to virtual address using the function like ioremap
-	Step 3: Use the kernel API to read from and write to registers with func like readl and writel
+1. Made required changes in MTD by adding a new OneNAND layer and corresponding adjustments in the MTD subsystem.
+2. Implemented the OneNAND driver initialization routine, added an entry in the MTD subsystem Makefile, and updated the Kconfig entry.
+3. Ported the flash-supported filesystem (JFFS2) from a higher kernel version, addressing changes in the core kernel filesystem subsystem.
+4. Utilized the open-source MTD test package, which includes utilities for verifying raw flash read/write/erase routines.
 
-# Driver Model:
-	- The driver model provides servel abstraction to device driver to make the code more modular, reusable and easy to maintain.
-	- Among its components we have,
-   	- Frameworks: the interface exported by a type of class of devices is standardized.
-        - The most common frameworks - input, IIO, ALSA, V2L2, RTC, watchdog etc.
-   	- Buses: information about the device and where they are connected is abstracted away from the driver.
+## Introduction to Character Device Driver
 
-# How to use the framework:
-	Step 1: Initialize an structure of type led_classdev
-	Step 2: Provide a callback function to chnage the status of led
-	Step 3: Register the driver in framework with the function led_classdev_register
+- **HW Access (MMIO, gpiolib)**
+- **Introduction to Driver Model**
+- **Frameworks**
+- **Buses and Device Tree**
 
-# Bus Infrastructure:
-	- Bus Core
-	- Bus adapter
-	- Bus drivers
-	- Bus devices
+Device drivers are abstractions for hardware. Although device drivers can run in userspace (via kernel interfaces such as UIO, I2CDEV, SPIDEV), providing an infrastructure to write and run device drivers is part of an OS kernel's responsibility.
 
-# Sysfs entry creation:
-	- First step ... Get the handle of sysfs
-	- Create sysfs directory under the /sysfs/kernel/ using -kobject_create_and_add()
-	- struct kobject * to add subdirectories, add files, etc.
-	- Free it once done -  kobject_put()
+In Linux, a file is the most common abstraction:
 
-# Important point to remember:
-	- When building a module out of kernel tree and your module uses EXPORT_SYMBOL 
-	  The build will not be success, to build such module copy the Module.symvers
-  
+- **File (user space)** → **Device Driver (Kernel)** → **HW Device (Hardware)**
+
+Device nodes provide an interface for users, typically in `/dev`, in the form of character or block device files. These device files have three basic attributes:
+- **Type**: Block or character
+- **Major number**
+- **Minor number**
+
+### Implementing a Character Device Driver
+
+Three steps are required to implement a character device driver:
+
+1. Allocate the driver number (major/minor). This can be done with `register_chardev_region` or `alloc_chardev_region`.
+2. Implement file operations (open, read, write, ioctl, etc.).
+3. Register the character driver in the kernel with `cdev_init` and `cdev_add`.
+
+### Hardware Interface
+
+Depending on the hardware architecture, a CPU can communicate with hardware through a few mechanisms:
+
+- **Port I/O**: A dedicated bus for communication with hardware.
+- **Memory-Mapped I/O (MMIO)**: The memory address space is shared with hardware. MMIO is commonly used by popular architectures like ARM.
+
+To interact with an MMIO device:
+1. Request access to MMIO registers using APIs such as `request_mem_region`.
+2. Map the register physical address to a virtual address with `ioremap`.
+3. Use kernel APIs to read from and write to registers, such as `readl` and `writel`.
+
+## Driver Model
+
+The driver model provides abstractions to device drivers, making the code modular, reusable, and easier to maintain. Key components include:
+
+- **Frameworks**: Standardized interfaces for device types (e.g., input, IIO, ALSA, V4L2, RTC, watchdog).
+- **Buses**: Abstract device connection information away from drivers.
+
+### Using a Framework
+
+1. Initialize a structure of type `led_classdev`.
+2. Provide a callback function to change the LED status.
+3. Register the driver in the framework with `led_classdev_register`.
+
+### Bus Infrastructure
+
+- **Bus Core**
+- **Bus Adapter**
+- **Bus Drivers**
+- **Bus Devices**
+
+## Sysfs Entry Creation
+
+1. Obtain the handle of `sysfs`.
+2. Create a sysfs directory under `/sysfs/kernel/` using `kobject_create_and_add()`.
+3. Use a `struct kobject *` to add subdirectories and files.
+4. Free the resource once done with `kobject_put()`.
+
+## Important Points
+
+- When building a module outside of the kernel tree that uses `EXPORT_SYMBOL`, the build may not succeed. To build such a module, copy the `Module.symvers`.
+ 
